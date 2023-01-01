@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <style>
+    body {
+      font-family: Arial;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select {
+      width: 100%;
+      padding: 12px 20px;
+      margin: 8px 0;
+      display: block;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    #submit {
+      width: 100%;
+      background-color: #04aa6d;
+      color: white;
+      padding: 14px 20px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 40px;
+    }
+
+    #submit:hover {
+      background-color: #45a049;
+    }
+
+    div.container {
+      border-radius: 5px;
+      background-color: #f2f2f2;
+      padding: 20px;
+    }
+
+    .loader {
+      border: 3px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 3px solid #0fda19;
+      width: 20px;
+      height: 20px;
+      -webkit-animation: spin 2s linear infinite; /* Safari */
+      animation: spin 2s linear infinite;
+      display: none;
+    }
+
+    /* Safari */
+    @-webkit-keyframes spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+      }
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <body>
+    <h2 style="text-align: center">Sign up here</h2>
+    <div class="container">
+      <form>
+        <label for="fname">Username</label>
+        <input
+          type="text"
+          required
+          id="name"
+          name="name"
+          placeholder="Your name.."
+        />
+
+        <label for="lname">password</label>
+        <input
+          type="password"
+          required
+          id="password"
+          name="password"
+          placeholder="Your password.."
+        />
+
+        <button type="submit" id="submit">
+          <span id="login-btn">Sign Up</span>
+          <div class="loader" id="loader-btn"></div>
+        </button>
+      </form>
+      <div>Already have an account? <a href="/">Login here</a></div>
+    </div>
+
+    <script>
+      // user will redirected if logged in
+      if (sessionStorage.getItem("current-user") !== null) {
+        window.location.replace("/home");
+      }
+      document.addEventListener(
+        "submit",
+        function (e) {
+          e.preventDefault();
+          document.getElementById("login-btn").style.display = "none";
+          document.getElementById("loader-btn").style.display = "block";
+
+          const name = document.getElementById("name").value;
+          const password = document.getElementById("password").value;
+          // console.log(name, email, password, role);
+          fetch("/register", {
+            method: "post",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name,
+              password,
+            }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.status === 204) {
+                swal("Oh Snap!", "Username already registered!", "error");
+              } else if (data.status === 400) {
+                swal("Oh Snap!", "Something went wrong!", "error");
+              } else if (data.status === 200) {
+                swal("Congrats!", "Successfully registered!", "success");
+                setTimeout(() => {
+                  window.location.replace("/");
+                }, [3000]);
+              }
+              document.getElementById("login-btn").style.display = "block";
+              document.getElementById("loader-btn").style.display = "none";
+            });
+        },
+        true
+      );
+    </script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  </body>
+</html>

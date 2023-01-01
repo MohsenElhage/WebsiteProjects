@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      .topnav {
+        overflow: hidden;
+        background-color: #333;
+      }
+
+      .topnav a {
+        float: left;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 17px;
+      }
+
+      .topnav a:hover {
+        background-color: #ddd;
+        color: black;
+      }
+
+      .topnav a.active {
+        background-color: #04aa6d;
+        color: white;
+      }
+
+      #myInput {
+        background-image: url("/css/searchicon.png");
+        background-position: 10px 12px;
+        background-repeat: no-repeat;
+        width: 100%;
+        font-size: 16px;
+        padding: 12px 20px 12px 40px;
+        border: 1px solid #ddd;
+        margin-bottom: 12px;
+      }
+
+      #myUL {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      #myUL li a {
+        border: 1px solid #ddd;
+        margin-top: -1px; /* Prevent double borders */
+        background-color: #f6f6f6;
+        padding: 12px;
+        text-decoration: none;
+        font-size: 18px;
+        color: black;
+        display: block;
+      }
+
+      #myUL li a:hover:not(.header) {
+        background-color: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topnav" id="nav">
+      <a href="/home">Back to home</a>
+    </div>
+
+    <input
+      type="text"
+      id="myInput"
+      onkeyup="myFunction()"
+      placeholder="Search by name, artist or category.."
+      title="Type in a name"
+    />
+
+    <ul id="myUL"></ul>
+
+    <script>
+      function myFunction() {
+        input = document.getElementById("myInput");
+        filter = input.value.toUpperCase();
+        outerUl = document.getElementById("myUL");
+        var divToAppend;
+        fetch("/searchtext", {
+          method: "post",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            word: filter,
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+            outerUl.innerHTML = "";
+            if (data.length >= 1) {
+              for (let i = 0; i < data.length; i++) {
+                console.log("hello");
+                divToAppend =
+                  '<li><a href="/user/' +
+                  data[i]["_id"] +
+                  '" class="searchresult" value=' +
+                  data[i]["_id"] +
+                  ">" +
+                  data[i]["name"] +
+                  "/" +
+                  data[i]["artist"] +
+                  "/" +
+                  data[i]["category"] +
+                  "</a></li>\n";
+                //  console.log(divToAppend)
+                outerUl.innerHTML += divToAppend;
+              }
+              addListener();
+            }
+          });
+      }
+      function addListener() {
+        [...document.getElementsByClassName("searchresult")].forEach(
+          (element) => {
+            element.addEventListener("click", (e) => {
+              const Id = e.target.getAttribute("value");
+              console.log(Id);
+            });
+          }
+        );
+      }
+    </script>
+  </body>
+</html>

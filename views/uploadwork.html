@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      input[type="text"],
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        resize: vertical;
+      }
+
+      label {
+        padding: 12px 12px 12px 0;
+        display: inline-block;
+      }
+
+      input[type="submit"] {
+        background-color: #04aa6d;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        float: right;
+      }
+
+      .cancel {
+        background-color: #6f7a76;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        height: 39px;
+        margin-right: 5px;
+        cursor: pointer;
+        float: right;
+      }
+
+      input[type="submit"]:hover {
+        background-color: #45a049;
+      }
+
+      .container {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        padding: 20px;
+      }
+
+      .col-25 {
+        float: left;
+        width: 25%;
+        margin-top: 6px;
+      }
+
+      .col-75 {
+        float: left;
+        width: 75%;
+        margin-top: 6px;
+      }
+
+      /* Clear floats after the columns */
+      .row:after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+
+      /* Responsive layout - when the screen is less than 600px wide, make the two columns stack on top of each other instead of next to each other */
+      @media screen and (max-width: 600px) {
+        .col-25,
+        .col-75,
+        input[type="submit"] {
+          width: 100%;
+          margin-top: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Upload Artwork</h2>
+
+    <div class="container">
+      <form action="/action_page.php">
+        <div class="row">
+          <div class="col-25">
+            <label for="fname">Artwork Name</label>
+          </div>
+          <div class="col-75">
+            <input
+              type="text"
+              id="name"
+              name="firstname"
+              placeholder="Artwork name"
+            />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-25">
+            <label for="lname">Medium</label>
+          </div>
+          <div class="col-75">
+            <input
+              type="text"
+              id="medium"
+              name="lastname"
+              placeholder="Medium"
+            />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-25">
+            <label for="lname">Category</label>
+          </div>
+          <div class="col-75">
+            <input
+              type="text"
+              id="category"
+              name="lastname"
+              placeholder="Category"
+            />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-25">
+            <label for="subject">Upload your artwork</label>
+          </div>
+          <div class="col-75">
+            <input type="file" id="get-file" accept="image/*" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-25">
+            <label for="subject">Description</label>
+          </div>
+          <div class="col-75">
+            <textarea
+              id="description"
+              name="subject"
+              placeholder="Description"
+              style="height: 200px"
+            ></textarea>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <input type="submit" id="submit" value="Submit" />
+            <a href="/home" class="cancel">Cancel</a>
+          </div>
+        </div>
+      </form>
+    </div>
+    <script>
+      // user will redirected if not logged in
+      if (sessionStorage.getItem("current-user") === null) {
+        window.location.replace("/");
+      }
+      var file;
+      document
+        .getElementById("get-file")
+        .addEventListener("change", ({ target: { files } }) => {
+          file = files[0];
+        });
+      document.getElementById("submit").addEventListener("click", (e) => {
+        e.preventDefault();
+        const name = document.getElementById("name").value;
+        const category = document.getElementById("category").value;
+        const medium = document.getElementById("medium").value;
+        const description = document.getElementById("description").value;
+        const artist = JSON.parse(sessionStorage.getItem("current-user"))[
+          "user"
+        ]["name"];
+        const postBy = JSON.parse(sessionStorage.getItem("current-user"))[
+          "user"
+        ]["_id"];
+        const date = new Date();
+        const data = new FormData();
+        data.append("file", file);
+        data.append("upload_preset", "insta_clone");
+        data.append("cloud_name", "qe");
+        fetch("https://api.cloudinary.com/v1_1/qe/image/upload", {
+          method: "post",
+          body: data,
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            fetch("/artwork", {
+              method: "post",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name,
+                artist,
+                category,
+                description,
+                postBy,
+                medium,
+                image: data.url,
+                year: date.getFullYear(),
+              }),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                console.log(data);
+                window.location.replace("/home");
+              });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      });
+    </script>
+  </body>
+</html>

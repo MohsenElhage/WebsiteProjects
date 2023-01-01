@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Following</title>
+    <style>
+      #followers {
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+        margin: 10px auto;
+      }
+      .inner {
+        display: flex;
+        box-shadow: 3px 2px 4px 6px rgb(208, 206, 206);
+        justify-content: space-around;
+        padding: 5px;
+      }
+      .button {
+        height: 40px;
+        margin-top: 4px;
+      }
+      .center {
+        text-align: center;
+      }
+      .cancel {
+        background-color: #6f7a76;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        margin: 20px 0px 0px 20px;
+        cursor: pointer;
+      }
+
+      .center-con {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Your following list:</h1>
+    <div id="followers"></div>
+    <div class="center-con">
+      <div class="center" id="not" style="display: none">
+        You have not followed any artist yet!
+      </div>
+      <a href="/home" class="cancel">Back To Home</a>
+    </div>
+
+    <script>
+      // user will redirected if not logged in
+      if (sessionStorage.getItem("current-user") === null) {
+        window.location.replace("/");
+      }
+      
+      window.onload = setList();
+
+      function setList() {
+        if (
+          JSON.parse(sessionStorage.getItem("current-user"))["user"][
+            "following"
+          ].length >= 1
+        ) {
+          document.getElementById("not").style.display = "none";
+          getAllData();
+        } else {
+          document.getElementById("not").style.display = "block";
+        }
+      }
+      var outerdiv = document.getElementById("followers");
+      console.log(
+        JSON.parse(sessionStorage.getItem("current-user"))["user"]["following"]
+      );
+      function getAllData() {
+        fetch("/user", {
+          method: "post",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            following: JSON.parse(sessionStorage.getItem("current-user"))[
+              "user"
+            ]["following"],
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            for (let i = 0; i < data.length; i++) {
+              var div =
+                '<div class="inner">\n' +
+                "<h4>" +
+                data[i]["name"] +
+                "</h4>\n" +
+                '<button class="button" value=' +
+                data[i]["_id"] +
+                ">unfollow</button>\n" +
+                "</div>";
+              outerdiv.innerHTML += div;
+            }
+            addListener();
+          });
+      }
+      function addListener() {
+        [...document.getElementsByClassName("button")].forEach((Element) => {
+          Element.addEventListener("click", (e) => {
+            e.preventDefault();
+            const tofollow = e.target.getAttribute("value");
+            fetch("unfollow", {
+              method: "put",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                tofollow,
+                byfollow: JSON.parse(sessionStorage.getItem("current-user"))[
+                  "user"
+                ]["_id"],
+              }),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                sessionStorage.clear();
+                sessionStorage.setItem(
+                  "current-user",
+                  JSON.stringify({ user: data })
+                );
+                if (
+                  JSON.parse(sessionStorage.getItem("current-user"))["user"][
+                    "following"
+                  ].length >= 1
+                ) {
+                  getAllData();
+                } else {
+                  setList();
+                  outerdiv.innerHTML = "";
+                }
+              });
+          });
+        });
+      }
+    </script>
+  </body>
+</html>
