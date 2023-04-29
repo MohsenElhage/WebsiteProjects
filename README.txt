@@ -1,3 +1,14 @@
+
+
+
+in this project i didnt use .env files to secure the jwt token and the db url it is meant to be for listing purpose but if i were to sequre it on git hub i wouldve
+
+used environment variables to store these sensitive information, and load them into my application using the process.env object. This way, i can keep my secrets separate from the code i submitted on github and prevent them from being accidentally exposed.
+
+and i wouldve used npm install dotenv
+then  Create a .env file in my project directory, and add the secrets to it
+then Load the environment variables using dotenv in the application code before using them.
+
 Here's the rough summary of the app:
 
 At first, we are sending data from signup page to backend to save user in mongoDB.
@@ -16,3 +27,4 @@ Non logged in user can's access any page except login or signup
 added that function in routes/users.js lines 401 to 427 and commented out those lines. You can uncomment them and replace the arrayToUpload
 variable with the data you wanna upload and when you hit /upload-static-data route from the browser, it will be uploaded to DB.
 
+ 
