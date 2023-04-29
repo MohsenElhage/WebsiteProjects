@@ -1,4 +1,6 @@
+
+const crypto = require('crypto');
 module.exports={
- JWT_TOKEN:"gdgdgg233gftugpp",
- DB_URL:"mongodb+srv://image-filter:zrTJcCqjwN82wiNJ@cluster0.omn80n9.mongodb.net/?retryWrites=true&w=majority"
+JWT_TOKEN: crypto.randomBytes(32).toString('hex'),
+ DB_URL:"mongodb+srv://mohsenelhage:XQLctwHMnX1Q1ht3@kurlz.ypcmcyb.mongodb.net/?retryWrites=true&w=majority"
 }
